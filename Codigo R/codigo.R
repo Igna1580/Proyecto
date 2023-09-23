@@ -11,8 +11,6 @@ felicidad <- clean_names(felicidad)
 felicidad <- felicidad %>% rename(country = country_name)
 
 
-#---Montse--------------------------------------------------
-
 # Cambiar "Turkiye" a "Turkey" en el data frame 'felicidad'
 felicidad <- felicidad %>%
   mutate(country = ifelse(country == "Turkiye", "Turkey", country))
@@ -32,9 +30,6 @@ base_datos <- inner_join(consumo_alcohol, felicidad, by = "country")
 relacion_AlcoholYFelicidad <- base_datos %>%
   select(country, ladder_score, both)
 
-#nuevo-----------------------------------------------------
-
-colnames(base_datos)
 
 
 # Crear un gráfico de dispersión entre felicidad y consumo de alcohol promedio
@@ -68,9 +63,6 @@ ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
   coord_flip() +
   theme(axis.text.y = element_text(size = 4))
 
-
-
-# montse 
 
 # Tabla solo la información de consumo de alcohol e índice de felicidad
 relacion_AlcoholYFelicidad <- base_datos %>%
@@ -169,41 +161,6 @@ interactive_scatter_plot <- ggplotly(scatter_plot)
 # Display the interactive scatter plot
 interactive_scatter_plot
 
-
-
-#--------Valeria-------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-#--------Jose Ignacio------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-#------Bryan-------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 # Filter the data for the "Asia" region
 asia_data <- relacion_AlcoholYFelicidad %>%
   filter(Region == "Asia")
@@ -221,3 +178,47 @@ interactive_scatter_plot_Asia <- ggplotly(scatter_plot_Asia)
 # Display the interactive scatter plot
 interactive_scatter_plot_Asia
 
+#--------Valeria-------------------------------------------------------------------------
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------------
+
+#--------Jose Ignacio------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+#--------------------------------------------------------------------------------------
+
+#------Bryan-------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------
+#---Montse--------------------------------------------------
+
+
+
+
+
+#-----------------------------------------------------
