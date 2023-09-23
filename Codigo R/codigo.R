@@ -3,6 +3,7 @@ library(janitor)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(cowplot)
 
 consumo_alcohol <- read.csv("alcohol-consumption-by-country-2023.csv")
 consumo_alcohol <- clean_names(consumo_alcohol)
@@ -216,9 +217,35 @@ ajefhhshrbiasrhbgiusrbhbilurh = 1
 
 #------------------------------------------------------------------------------------------
 #---Montse--------------------------------------------------
+# Para aumentar el tamaño del gráfico 
+options(repr.plot.width = 4, repr.plot.height = 10)
 
-# prueba
+# Ordenar el data frame por consumo de alcohol de menor a mayor
+relacion_AlcoholYFelicidad <- relacion_AlcoholYFelicidad %>%
+  arrange(both)
 
+# Crear un gráfico de barras horizontales
+bar_plot <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Consumo de Alcohol",
+    y = "País",
+    title = "Consumo de Alcohol por País (Ordenado de mayor a menor)",
+    subtitle = "Codificado con Escala de Color según Índice de Felicidad",
+    fill = "Índice de Felicidad"
+  ) +
+  scale_fill_gradient(low = "red", high = "green") +  # Escala de colores de rojo a verde
+  theme_minimal() + cowplot::theme_cowplot() + # Aplicar un tema minimalista
+  theme(axis.text.y = element_text(size = 3, hjust = 0),  # Ajustar el tamaño y alineación del texto en el eje y
+        plot.title = element_text(size = 8),
+        plot.subtitle = element_text(size = 7),# Ajustar el tamaño del título
+        legend.text = element_text(size = 4),  # Ajustar el tamaño del texto en el color key
+        legend.title = element_text(size = 4)) +  # Ajustar el tamaño del título del color key
+  guides(fill = guide_colorbar(barwidth = 2, barheight = 6))  # Ajustar el tamaño del color key
 
+# Guardar el gráfico en un objeto llamado "consumo_MenorAMayor_color"
+consumo_MenorAMayor_color <- bar_plot
 
+# Mostrar el gráfico
+print(consumo_MenorAMayor_color)
 #-----------------------------------------------------
