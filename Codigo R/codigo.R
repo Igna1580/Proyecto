@@ -191,9 +191,25 @@ interactive_scatter_plot_Asia
 
 #--------Jose Ignacio------------------------------------------------------------------------------
 
+#Buscando el paraemtro(consumo de alcohol) de maxima verosimilitud respecto a felicidad
+n = length(base_datos$ladder_score)
+sum.felicidad = sum(base_datos$ladder_score)
+mu = sum.felicidad/n
+sigma.cuadrado = (sum((base_datos$ladder_score-mu)^2))/n
+theta = seq(1.778, 7.804, length.out = 1000)
 
-ajefhhshrbiasrhbgiusrbhbilurh = 1
-
+#Grafico de Maxima Verosimilitud
+ggplot(data.frame(
+  theta = theta,
+  L = (1/sqrt(2*pi*sigma.cuadrado))*exp((-(theta-mu)^2)/(2*sigma.cuadrado))), 
+  aes(x = theta , y = L)) +
+  geom_line(linewidth = 2) +
+  geom_vline(aes(xintercept = mean(base_datos$ladder_score)), linewidth = 2, color = "red") +
+  cowplot::theme_cowplot() +
+  labs(
+    title = "Verosimilitud con la media de x", x = "Theta", y =
+      "Verosimilitud"
+  )
 
 
 
