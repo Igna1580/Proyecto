@@ -5,6 +5,8 @@ library(ggplot2)
 library(plotly)
 library(cowplot)
 
+#---CSV y formatos--------------------------------------------------------------
+#Abrir y dar formato a las bases de datos
 consumo_alcohol <- read.csv("alcohol-consumption-by-country-2023.csv")
 consumo_alcohol <- clean_names(consumo_alcohol)
 felicidad <- read.csv("WHR2023.csv")
@@ -15,7 +17,6 @@ felicidad <- felicidad %>% rename(country = country_name)
 # Cambiar "Turkiye" a "Turkey" en el data frame 'felicidad'
 felicidad <- felicidad %>%
   mutate(country = ifelse(country == "Turkiye", "Turkey", country))
-
 # Cambiar "DR Congo" to "Congo (Brazzaville)" en el data frame 'consumo_alcohol'
 consumo_alcohol <- consumo_alcohol %>%
   mutate(country = ifelse(country == "DR Congo", "Congo (Brazzaville)", country))
@@ -31,46 +32,7 @@ base_datos <- inner_join(consumo_alcohol, felicidad, by = "country")
 relacion_AlcoholYFelicidad <- base_datos %>%
   select(country, ladder_score, both)
 
-
-
-# Crear un gráfico de dispersión entre felicidad y consumo de alcohol promedio
-ggplot(base_datos, aes(x = ladder_score, y = both)) +
-  geom_point() +
-  labs(x = "Felicidad", y = "Consumo de alcohol", title = "Relación entre felicidad y consumo de alcohol promedio")
-
-
-
-# Crear un gráfico de barras horizontales ordenado por ladder_score para hombres
-ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
-  geom_bar(stat = "identity", fill = "blue") +
-  labs(x = "Consumo de Alcohol en Hombres", y = "País", title = "Consumo de Alcohol en Hombres por País") +
-  #theme_minimal() +
-  coord_flip() +
-  theme(axis.text.y = element_text(size = 4))
-
-# Crear un gráfico de barras horizontales ordenado por ladder_score para mujeres
-ggplot(base_datos, aes(x = reorder(country, ladder_score), y = female)) +
-  geom_bar(stat = "identity", fill = "red") +
-  labs(x = "Consumo de Alcohol en mujeres", y = "País", title = "Consumo de Alcohol en Mujeres por País") +
-  #theme_minimal() +
-  coord_flip() +
-  theme(axis.text.y = element_text(size = 4))
-
-# Crear un gráfico de barras horizontales ordenado por ladder_score por país
-ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
-  geom_bar(stat = "identity", fill = "green") +
-  labs(x = "Consumo de Alcohol por país", y = "País", title = "Consumo de Alcohol por País") +
-  #theme_minimal() +
-  coord_flip() +
-  theme(axis.text.y = element_text(size = 4))
-
-
-# Tabla solo la información de consumo de alcohol e índice de felicidad
-relacion_AlcoholYFelicidad <- base_datos %>%
-  select(country, ladder_score, both)
-
-
-# Create a new column "Region" based on country
+# Cerar una nueva columna "Region" basado en el pais
 relacion_AlcoholYFelicidad <- relacion_AlcoholYFelicidad %>%
   mutate(Region = ifelse(
     country %in% c(
@@ -144,42 +106,77 @@ relacion_AlcoholYFelicidad <- relacion_AlcoholYFelicidad %>%
     )
   ))
 
-
-# Filter the data for the "Europe" region
+# Filtrar para region europea
 europe_data <- relacion_AlcoholYFelicidad %>%
   filter(Region == "Europe")
+# Filtrar para region asiatica
+asia_data <- relacion_AlcoholYFelicidad %>%
+  filter(Region == "Asia")
+
+
+#---Creacion de variables globales----------------------------------------------
+
+
+#---Graficos--------------------------------------------------------------------
+
+# Crear un gráfico de dispersión entre felicidad y consumo de alcohol promedio
+ggplot(base_datos, aes(x = ladder_score, y = both)) +
+  geom_point() +
+  labs(x = "Felicidad", y = "Consumo de alcohol", title = "Relación entre felicidad y consumo de alcohol promedio")
+
+
+
+# Crear un gráfico de barras horizontales ordenado por ladder_score para hombres
+ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(x = "Consumo de Alcohol en Hombres", y = "País", title = "Consumo de Alcohol en Hombres por País") +
+  #theme_minimal() +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 4))
+
+# Crear un gráfico de barras horizontales ordenado por ladder_score para mujeres
+ggplot(base_datos, aes(x = reorder(country, ladder_score), y = female)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(x = "Consumo de Alcohol en mujeres", y = "País", title = "Consumo de Alcohol en Mujeres por País") +
+  #theme_minimal() +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 4))
+
+# Crear un gráfico de barras horizontales ordenado por ladder_score por país
+ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
+  geom_bar(stat = "identity", fill = "green") +
+  labs(x = "Consumo de Alcohol por país", y = "País", title = "Consumo de Alcohol por País") +
+  #theme_minimal() +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 4))
+
+
+# Tabla solo la información de consumo de alcohol e índice de felicidad
+relacion_AlcoholYFelicidad <- base_datos %>%
+  select(country, ladder_score, both)
 
 # Create a ggplot scatter plot
-
 scatter_plot <- ggplot(europe_data, aes(x = both, y = ladder_score, label = country)) +
   geom_point() +
   geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +  # Add text labels
   labs(x = "Both", y = "Scorelader", title = "Scatter Plot of Both vs. Scorelader in Europe")
-
 # Convert the ggplot scatter plot to a plotly object
 interactive_scatter_plot <- ggplotly(scatter_plot)
-
 # Display the interactive scatter plot
 interactive_scatter_plot
 
-# Filter the data for the "Asia" region
-asia_data <- relacion_AlcoholYFelicidad %>%
-  filter(Region == "Asia")
 
 # Create a ggplot scatter plot
-
 scatter_plot_Asia <- ggplot(asia_data, aes(x = both, y = ladder_score, label = country)) +
   geom_point() +
   geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +  # Add text labels
   labs(x = "Both", y = "Scorelader", title = "Scatter Plot of Both vs. Scorelader in Asia")
-
 # Convert the ggplot scatter plot to a plotly object
 interactive_scatter_plot_Asia <- ggplotly(scatter_plot_Asia)
-
 # Display the interactive scatter plot
 interactive_scatter_plot_Asia
 
-#--------Valeria-------------------------------------------------------------------------
+#---Bloque Valeria--------------------------------------------------------------
 
 
 
@@ -187,11 +184,10 @@ interactive_scatter_plot_Asia
 
 
 
-#---------------------------------------------------------------------------------
 
-#--------Jose Ignacio------------------------------------------------------------------------------
+#---Bloque Jose Ignacio---------------------------------------------------------
 
-#Buscando el paraemtro(consumo de alcohol) de maxima verosimilitud respecto a felicidad
+#Buscando el paraemtro de maxima verosimilitud respecto a felicidad
 n = length(base_datos$ladder_score)
 sum.felicidad = sum(base_datos$ladder_score)
 mu = sum.felicidad/n
@@ -217,10 +213,8 @@ ggplot(data.frame(
 
 
 
-#--------------------------------------------------------------------------------------
 
-#------Bryan-------------------------------------------------------------------------------------
-
+#---Bloque Bryan----------------------------------------------------------------
 
 
 
@@ -231,8 +225,8 @@ ggplot(data.frame(
 
 
 
-#------------------------------------------------------------------------------------------
-#---Montse--------------------------------------------------
+
+#---Bloque Montse---------------------------------------------------------------
 # Para aumentar el tamaño del gráfico 
 options(repr.plot.width = 4, repr.plot.height = 10)
 
@@ -264,4 +258,27 @@ consumo_MenorAMayor_color <- bar_plot
 
 # Mostrar el gráfico
 print(consumo_MenorAMayor_color)
-#-----------------------------------------------------
+
+#---Notas y pendientes----------------------------------------------------------
+#* Arreglar textos en ingles en seccion Graficos
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+#*
+
