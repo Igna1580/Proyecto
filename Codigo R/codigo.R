@@ -11,7 +11,7 @@ felicidad <- clean_names(felicidad)
 felicidad <- felicidad %>% rename(country = country_name)
 
 
-#nuevo --------------------------------------------------
+#---Montse--------------------------------------------------
 
 # Cambiar "Turkiye" a "Turkey" en el data frame 'felicidad'
 felicidad <- felicidad %>%
@@ -168,6 +168,37 @@ interactive_scatter_plot <- ggplotly(scatter_plot)
 
 # Display the interactive scatter plot
 interactive_scatter_plot
+
+
+
+#--------Valeria-------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+#--------Jose Ignacio------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+#------Bryan-------------------------------------------------------------------------------------
+
+
+
+
 
 
 
