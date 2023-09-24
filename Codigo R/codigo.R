@@ -155,9 +155,6 @@ ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
   theme(axis.text.y = element_text(size = 4))
 
 
-# Tabla solo la información de consumo de alcohol e índice de felicidad
-relacion_AlcoholYFelicidad <- base_datos %>%
-  select(country, ladder_score, both)
 
 # Create a ggplot scatter plot
 scatter_plot <- ggplot(europe_data, aes(x = both, y = ladder_score, label = country)) +
@@ -242,11 +239,11 @@ ggplot(data.frame(
 options(repr.plot.width = 4, repr.plot.height = 10)
 
 # Ordenar el data frame por consumo de alcohol de menor a mayor
-relacion_AlcoholYFelicidad <- relacion_AlcoholYFelicidad %>%
+relacion_AlcoholYFelicidad2 <- relacion_AlcoholYFelicidad %>%
   arrange(both)
 
 # Crear un gráfico de barras horizontales
-gráfico_Barras1 <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
+gráfico_Barras1 <- ggplot(relacion_AlcoholYFelicidad2, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
   geom_bar(stat = "identity") +
   labs(
     x = "Consumo de Alcohol",
