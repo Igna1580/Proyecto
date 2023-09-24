@@ -5,6 +5,7 @@ library(ggplot2)
 library(plotly)
 library(cowplot)
 
+
 consumo_alcohol <- read.csv("alcohol-consumption-by-country-2023.csv")
 consumo_alcohol <- clean_names(consumo_alcohol)
 felicidad <- read.csv("WHR2023.csv")
@@ -217,6 +218,8 @@ ajefhhshrbiasrhbgiusrbhbilurh = 1
 
 #------------------------------------------------------------------------------------------
 #---Montse--------------------------------------------------
+
+# Gráfico 1: - Consumo de Alcohol por País, codificado con Escala de Color según Índice de Felicidad
 # Para aumentar el tamaño del gráfico 
 options(repr.plot.width = 4, repr.plot.height = 10)
 
@@ -225,7 +228,7 @@ relacion_AlcoholYFelicidad <- relacion_AlcoholYFelicidad %>%
   arrange(both)
 
 # Crear un gráfico de barras horizontales
-bar_plot <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
+gráfico_Barras1 <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
   geom_bar(stat = "identity") +
   labs(
     x = "Consumo de Alcohol",
@@ -243,9 +246,232 @@ bar_plot <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = reorder(country
         legend.title = element_text(size = 4)) +  # Ajustar el tamaño del título del color key
   guides(fill = guide_colorbar(barwidth = 2, barheight = 6))  # Ajustar el tamaño del color key
 
-# Guardar el gráfico en un objeto llamado "consumo_MenorAMayor_color"
-consumo_MenorAMayor_color <- bar_plot
+# Guardar el gráfico llamado "consumo_MenorAMayor_color"
+consumo_MenorAMayor_color <- gráfico_Barras1
 
 # Mostrar el gráfico
 print(consumo_MenorAMayor_color)
+
+# Gráfico 2: Promedio de Consumo de Alcohol por Región, ordenado por Índice de Felicidad Promedio
+
+# Calcular los promedios por región
+promedios_region <- relacion_AlcoholYFelicidad %>%
+  group_by(Region) %>%
+  summarise(
+    Promedio_Alcohol = mean(both),
+    Promedio_Felicidad = mean(ladder_score)
+  ) %>%
+  arrange(desc(Promedio_Felicidad))  # Ordenar por índice de felicidad promedio de mayor a menor
+
+# Modificacón los nombres de las regiones 
+promedios_region$Region <- case_when(
+  promedios_region$Region == "Europe" ~ "Europa",
+  promedios_region$Region == "Sub-Saharan Africa" ~ "Africa y Africa Sub-sahariana",
+  promedios_region$Region == "Asia" ~ "Asia",
+  promedios_region$Region == "Australia and Oceania" ~ "AUS y OCE",
+  promedios_region$Region == "North America" ~ "Norteamérica",
+  promedios_region$Region == "South America" ~ "Suramérica",
+  promedios_region$Region == "Middle East, North Africa, and Greater Arabia" ~ "M. Oriente y  N. África",
+  promedios_region$Region == "Central America and the Caribbean" ~ "Centroamérica y el Caribe",
+  TRUE ~ promedios_region$Region  # Mantener otros nombres sin cambios
+)
+
+# Crear el gráfico de barras
+grafico_promedios <- ggplot(promedios_region, aes(x = reorder(Region, -Promedio_Felicidad), y = Promedio_Alcohol, fill = Promedio_Felicidad)) +
+  geom_bar(stat = "identity") +
+  labs(
+    x = "Región",
+    y = "Promedio de Consumo de Alcohol",
+    title = "Promedio de Consumo de Alcohol por Región",
+    subtitle = "Ordenado por Índice de Felicidad Promedio"
+  ) +
+  theme_minimal() +
+  cowplot::theme_cowplot() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
+    axis.title.x = element_text(size = 10), # Ajustar el tamaño del texto del eje x
+    axis.title.y = element_text(size = 10),
+    plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "cm"),  # Aumentar el margen derecho
+    legend.position = c(0.9, 0.95),  # Colocar la leyenda en la esquina superior derecha
+    legend.title = element_text(size = 10),  # Tamaño del título de la leyenda
+    legend.text = element_text(size = 8)  # Tamaño del texto de la leyenda (nombre de la barra de colores)
+  ) + 
+  scale_fill_gradient(low = "red", high = "green", name = "Índice de Felicidad") +
+  geom_text(aes(label = round(Promedio_Felicidad, 2)), vjust = -0.5, size = 3)  # Agregar etiquetas de promedio de felicidad arriba de las barras
+
+# Mostrar el gráfico
+grafico_promedios
+
+
+# Gráfico 3: Gráfico de dispersión con línea de regresión
+
+# Crear el gráfico
+grafico_dispersion <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = ladder_score)) +
+  geom_point() + cowplot::theme_cowplot() +  # Gráfico de dispersión
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Línea de regresión
+  labs(
+    x = "Consumo de Alcohol",
+    y = "Índice de Felicidad",
+    title = "Gráfico de Dispersión con Línea de Regresión"
+  )
+
+# Mostrar el gráfico 
+print(grafico_dispersion)
+
+
+# Gráfico 4: Gráfico de Caja y Bigotes del Índice de Felicidad del 30% de los Países con Mayor Consumo de Alcohol
+
+# Ordenar los datos por consumo de alcohol de mayor a menor
+relacion_AlcoholYFelicidad2 <- relacion_AlcoholYFelicidad %>%
+  arrange(desc(both))
+
+# Calcular el número de países que representa el 30%
+n_paises <- nrow(relacion_AlcoholYFelicidad2)
+n_paises_30_porcentaje <- round(0.30 * n_paises)
+
+# Seleccionar el 30% superior de países en función del consumo de alcohol
+paises_seleccionados <- head(relacion_AlcoholYFelicidad, n_paises_30_porcentaje)
+
+# Crear el gráfico de caja y bigotes del índice de felicidad para los países seleccionados
+caja_y_bigotes_felicidad <- ggplot(paises_seleccionados, aes(y = ladder_score)) +
+  geom_boxplot() + cowplot::theme_cowplot() +  # Agregar el gráfico de caja y bigotes
+  labs(
+    y = "Índice de Felicidad",
+    title = "Caja y Bigotes del Índice de Felicidad del",
+    subtitle = "Considerando el 30% de los Países con Mayor Consumo de Alcohol"
+  )
+
+# Mostrar el gráfico de caja y bigotes
+print(caja_y_bigotes_felicidad)
+
+# Gráfico 5: Gráfico de Caja y Bigotes del Índice de Felicidad por Región considerando el 80% de países con mayor consumo de alcohol
+
+# Calcular el 80% de los países con mayor consumo de alcohol en cada región
+
+pct <- 0.8  # Porcentaje del 80%
+top_countries <- relacion_AlcoholYFelicidad %>%
+  group_by(Region) %>%
+  arrange(desc(both)) %>%
+  slice(1:round(n() * pct)) %>%
+  pull(country)
+
+# Filtrar los datos para incluir solo esos países
+filtered_data <- relacion_AlcoholYFelicidad %>%
+  filter(country %in% top_countries)
+
+# Crear un gráfico de caja y bigotes por región
+
+# Nuevos nombres de las regiones
+nuevos_nombres <- c(
+  "Europe" = "Europa",
+  "Sub-Saharan Africa" = "Africa y Africa Sub-sahariana",
+  "Asia" = "Asia",
+  "Australia and Oceania" = "AUS y OCE",
+  "North America" = "Norteamérica",
+  "South America" = "Suramérica",
+  "Middle East, North Africa, and Greater Arabia" = "M. Oriente y N. África",
+  "Central America and the Caribbean" = "Centroamérica y el Caribe"
+)
+
+# Cambiar los nombres de las regiones en los datos
+filtered_data$Region <- nuevos_nombres[filtered_data$Region]
+
+# Crear el gráfico de caja y bigotes con los nuevos nombres de regiones en el eje x
+caja_y_bigotes_region <- ggplot(filtered_data, aes(x = Region, y = ladder_score, fill = Region)) +
+  geom_boxplot(outlier.color = "red") + cowplot::theme_cowplot() +
+  labs(
+    y = "Índice de Felicidad",
+    title = "Gráfico de Caja y Bigotes del Índice de Felicidad por Región",
+    subtitle = "Considerando el 80% de países con mayor consumo de alcohol"
+  ) +
+  theme_minimal() +
+  scale_fill_discrete(name = "Región") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Inclinar el eje x
+
+caja_y_bigotes_region
+
+# Cuadro 1: Correlación entre Consumo de alcohol y variables de el índice de felicidad
+
+# Variables a analizar
+variables_interes <- c("both", "social_support", "healthy_life_expectancy", "freedom_to_make_life_choices", "generosity", "perceptions_of_corruption", "ladder_score")
+
+# Regiones
+regiones_unicas <- c(
+  "Europe",
+  "Sub-Saharan Africa",
+  "Asia",
+  "Australia and Oceania",
+  "North America",
+  "South America",
+  "Central America and the Caribbean",
+  "Middle East, North Africa, and Greater Arabia"
+)
+
+# Crear una lista para almacenar las matrices de correlación por región
+correlacion_matrices <- list()
+
+# Bucle para calcular las matrices de correlación por región
+for (region in regiones_unicas) {
+  # Filtrar los datos para la región actual
+  datos_region <- base_datos %>% filter(region == region)
+  
+  # Calcular la matriz de correlación
+  correlacion_matrix <- cor(datos_region[variables_interes])
+  
+  # Almacenar la matriz de correlación en la lista
+  correlacion_matrices[[region]] <- correlacion_matrix
+}
+
+# Calcular la matriz de correlación promedio para todas las regiones
+correlacion_matrix_general <- matrix(NA, nrow = length(variables_interes), ncol = 1)
+colnames(correlacion_matrix_general) <- c("General")
+
+for (i in seq_along(variables_interes)) {
+  variable <- variables_interes[i]
+  region_correlacion <- sapply(correlacion_matrices, function(mat) mat[1, i])
+  correlacion_matrix_general[i, ] <- mean(region_correlacion, na.rm = TRUE)
+}
+
+# Crear un data frame con las correlaciones para todas las regiones, incluyendo "General"
+correlacion_datos <- data.frame(Variable = variables_interes)
+for (region in regiones_unicas) {
+  region_correlacion <- correlacion_matrices[[region]][1, ]  # Correlaciones de "both" con todas las variables
+  correlacion_datos[, region] <- region_correlacion
+}
+
+# Agregar la columna "General" al data frame
+correlacion_datos$General <- correlacion_matrix_general[, "General"]
+
+# Eliminar la fila correspondiente a "both"
+correlacion_datos <- correlacion_datos[correlacion_datos$Variable != "both", ]
+
+# Mover la fila "General" al principio
+correlacion_datos <- correlacion_datos %>%
+  arrange(desc(Variable == "General"))
+
+# Mover la fila "ladderscore" al principio
+correlacion_datos <- correlacion_datos %>%
+  arrange(desc(Variable == "ladder_score"))
+
+# Nuevos nombres de las variables
+nuevos_nombres <- c("Indice de felicidad", "Seguro Social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
+
+# Cambiar los nombres de las variables
+correlacion_datos <- correlacion_datos %>%
+  mutate(Variable = nuevos_nombres)
+
+colnames(correlacion_datos)[2] <- "Europa"
+colnames(correlacion_datos)[3] <- "Africa Sub-sahariana"
+colnames(correlacion_datos)[5] <- "Australia y OCeanía"
+colnames(correlacion_datos)[6] <- "Norteamérica"
+colnames(correlacion_datos)[7] <- "Suramérica"
+colnames(correlacion_datos)[8] <- "Centroamérica y el Caribe"
+colnames(correlacion_datos)[9] <- "Medio Oriente y N. Africa
+"
+# Mostrar el data frame actualizado
+print(correlacion_datos)
+
 #-----------------------------------------------------
+
+
+
