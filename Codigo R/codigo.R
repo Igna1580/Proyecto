@@ -200,6 +200,26 @@ density_plot_a
 plot(density(relacion_AlcoholYFelicidad2$both))
 plot(density(relacion_AlcoholYFelicidad2$ladder_score))
 
+#pruebas de hipotesis: los datos provienen de una distribución normal
+ks_test_felicidad <- ks.test(relacion_AlcoholYFelicidad2$ladder_score, "pnorm", mean = mean(relacion_AlcoholYFelicidad2$ladder_score), sd = sd(relacion_AlcoholYFelicidad2$ladder_score))
+print("Resultados del test de Kolmogorov-Smirnov para el grupo 1:")
+print(ks_test_felicidad)
+
+ks_test_alcohol <- ks.test(relacion_AlcoholYFelicidad2$both, "pnorm", mean = mean(relacion_AlcoholYFelicidad2$both), sd = sd(relacion_AlcoholYFelicidad2$both))
+print("Resultados del test de Kolmogorov-Smirnov para el grupo 2:")
+print(ks_test_alcohol)
+
+ad_test_felicidad <- ad.test(relacion_AlcoholYFelicidad2$ladder_score)
+print(ad_test_felicidad)
+ad_test_alcohol <- ad.test(relacion_AlcoholYFelicidad2$both)
+print(ad_test_alcohol) #p<0.05 => se puede rechazar la hipotesis nula (los datos tienen distribucion normal)
+
+lil_test_felicidad <- lillie.test(relacion_AlcoholYFelicidad2$ladder_score)
+print(lil_test_felicidad)
+lil_test_alcohol <- lillie.test(relacion_AlcoholYFelicidad2$both)
+print(lil_test_alcohol) #p<0.05 => se puede rechazar la hipotesis nula (los datos tienen distribucion normal)
+
+
 
 
 
