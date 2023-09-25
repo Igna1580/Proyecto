@@ -176,6 +176,29 @@ interactive_scatter_plot_Asia
 
 #---Bloque Valeria--------------------------------------------------------------
 
+#Graficos
+distribucion_felicidad <- ggplot(relacion_AlcoholYFelicidad2, aes(x=ladder_score)) +
+  geom_histogram(binwidth = 0.5, col='black', fill= 'pink')+
+  labs(x= "Ladder_Score", y="Frecuencia")
+distribucion_felicidad
+density_plot_f <- ggplot(data.frame(x = relacion_AlcoholYFelicidad2$ladder_score), aes(x = x)) +
+  geom_density(fill = "pink", alpha = 0.5) +
+  labs(x = "Valor", y = "Densidad") +
+  theme_minimal()
+density_plot_f
+distribucion_alcohol <- ggplot(relacion_AlcoholYFelicidad2, aes(x=both)) +
+  geom_histogram(binwidth = 0.7, col='black', fill= 'purple')+
+  labs(x= "Alcohol consumption", y="Frecuencia")
+distribucion_alcohol
+density_plot_a <- ggplot(data.frame(x = relacion_AlcoholYFelicidad2$both), aes(x = x)) +
+  geom_density(fill = "purple", alpha = 0.5) +
+  labs(x = "Valor", y = "Densidad") +
+  theme_minimal()
+density_plot_a
+
+#verificacion con colas
+plot(density(relacion_AlcoholYFelicidad2$both))
+plot(density(relacion_AlcoholYFelicidad2$ladder_score))
 
 
 
