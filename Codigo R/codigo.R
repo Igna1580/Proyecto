@@ -129,7 +129,6 @@ ggplot(base_datos, aes(x = ladder_score, y = both)) +
   labs(x = "Felicidad", y = "Consumo de alcohol", title = "Relación entre felicidad y consumo de alcohol promedio")
 
 
-
 # Crear un gráfico de barras horizontales ordenado por ladder_score para hombres
 ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
   geom_bar(stat = "identity", fill = "blue") +
@@ -156,25 +155,23 @@ ggplot(base_datos, aes(x = reorder(country, ladder_score), y = male)) +
 
 
 
-# Create a ggplot scatter plot
+# Crear un grafico de dispersion 
 scatter_plot <- ggplot(europe_data, aes(x = both, y = ladder_score, label = country)) +
   geom_point() +
-  geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +  # Add text labels
+  geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +
   labs(x = "Both", y = "Scorelader", title = "Scatter Plot of Both vs. Scorelader in Europe")
-# Convert the ggplot scatter plot to a plotly object
+# convertirlo a interactivo
 interactive_scatter_plot <- ggplotly(scatter_plot)
-# Display the interactive scatter plot
+# Mostrarlo
 interactive_scatter_plot
 
 
-# Create a ggplot scatter plot
+# Crear un grafico de dispersion 
 scatter_plot_Asia <- ggplot(asia_data, aes(x = both, y = ladder_score, label = country)) +
   geom_point() +
-  geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +  # Add text labels
+  geom_text(nudge_x = 0.1, nudge_y = 0.1, size = 3) +  
   labs(x = "Both", y = "Scorelader", title = "Scatter Plot of Both vs. Scorelader in Asia")
-# Convert the ggplot scatter plot to a plotly object
 interactive_scatter_plot_Asia <- ggplotly(scatter_plot_Asia)
-# Display the interactive scatter plot
 interactive_scatter_plot_Asia
 
 #---Bloque Valeria--------------------------------------------------------------
@@ -228,13 +225,11 @@ ggplot(data.frame(
 
 
 
-#------------------------------------------------------------------------------------------
-#---Montse--------------------------------------------------
 
-# Gráfico 1: - Consumo de Alcohol por País, codificado con Escala de Color según Índice de Felicidad
 
 #---Bloque Montse---------------------------------------------------------------
 
+# Gráfico 1: - Consumo de Alcohol por País, codificado con Escala de Color según Índice de Felicidad
 # Para aumentar el tamaño del gráfico 
 options(repr.plot.width = 4, repr.plot.height = 10)
 
@@ -402,9 +397,55 @@ caja_y_bigotes_region <- ggplot(filtered_data, aes(x = Region, y = ladder_score,
   ) +
   theme_minimal() +
   scale_fill_discrete(name = "Región") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Inclinar el eje x
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + cowplot::theme_cowplot()  # Inclinar el eje x
 
 caja_y_bigotes_region
+
+# otra version 
+# Calcular los deciles del consumo de alcohol y asignarlos a una nueva variable
+relacion_AlcoholYFelicidad2 <- relacion_AlcoholYFelicidad2 %>%
+  mutate(decil_alcohol = ntile(both, 10))
+
+# Crear el gráfico de caja y bigotes por deciles de consumo de alcohol
+caja_y_bigotes_deciles <- ggplot(relacion_AlcoholYFelicidad2, aes(x = factor(decil_alcohol), y = ladder_score)) +
+  geom_boxplot(outlier.color = "red") + cowplot::theme_cowplot() +
+  labs(
+    x = "Decil de Consumo de Alcohol",
+    y = "Índice de Felicidad",
+    title = "Gráfico de Caja y Bigotes del Índice de Felicidad por Decil de Consumo de Alcohol"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1))  # Inclinar el eje x
+
+# Mostrar el gráfico
+print(caja_y_bigotes_deciles)
+
+# Gráfico 6: Índice de Felicidad Promedio por Decil de Consumo de Alcohol
+
+
+# Calcular el promedio del índice de felicidad para cada decil
+promedio_felicidad_por_decil <- relacion_AlcoholYFelicidad2 %>%
+  group_by(decil_alcohol) %>%
+  summarize(promedio_felicidad = mean(ladder_score))
+
+
+# Crear un gráfico de línea con límites personalizados en el eje x
+gráfico_Línea <- ggplot(promedio_felicidad_por_decil, aes(x = decil_alcohol, y = promedio_felicidad)) +
+  geom_line() +
+  labs(
+    x = "Decil de Consumo de Alcohol",
+    y = "Índice de Felicidad Promedio",
+    title = "Índice de Felicidad Promedio por Decil de Consumo de Alcohol"
+  ) +
+  theme_minimal() +
+  cowplot::theme_cowplot() +
+  scale_x_continuous(breaks = 0:10)  # Establecer límites y marcas en el eje x
+
+# Mostrar el gráfico de línea
+print(gráfico_Línea)
+
+# Mostrar el gráfico de línea
+print(gráfico_Línea)
 
 # Cuadro 1: Correlación entre Consumo de alcohol y variables de el índice de felicidad
 
@@ -487,11 +528,67 @@ colnames(correlacion_datos)[9] <- "Medio Oriente y N. Africa
 # Mostrar el data frame actualizado
 print(correlacion_datos)
 
-#-----------------------------------------------------
+# version 2: Correlación entre Consumo de alcohol y variables de el índice de felicidad según decil 
+
+# Calcular los deciles del consumo de alcohol y asignarlos a una nueva variable
+base_datos2 <- base_datos %>%
+  arrange(both) %>%
+  mutate(decil_alcohol = ntile(both, 10))
+
+# Crear un data frame para almacenar las correlaciones
+correlacion_deciles <- data.frame(Variable = variables_interes)
+
+# Calcular las correlaciones para cada decil y cada variable
+for (i in 1:10) {
+  decil_data <- base_datos2 %>% filter(decil_alcohol == i)
+  correlaciones <- sapply(variables_interes, function(var) cor(decil_data$both, decil_data[[var]]))
+  correlacion_deciles[paste("Decil_", i, sep = "")] <- correlaciones
+}
+
+# Cambiar los nombres de las filas
+rownames(correlacion_deciles) <- variables_interes
+
+
+# Eliminar la fila correspondiente a "both"
+correlacion_deciles <- correlacion_deciles[correlacion_deciles$Variable != "both", ]
+
+# Mover la fila "ladder_score" al principio
+correlacion_deciles <- correlacion_deciles %>%
+  arrange(desc(Variable == "ladder_score"))
+
+# Nuevos nombres de las variables
+nuevos_nombres <- c("Indice de felicidad", "Seguro Social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
+
+# Cambiar los nombres de las variables
+correlacion_deciles$Variable <- nuevos_nombres
+
+colnames(correlacion_deciles)[2] <- "Decil 1"
+colnames(correlacion_deciles)[3] <- "Decil 2"
+colnames(correlacion_deciles)[4] <- "Decil 3"
+colnames(correlacion_deciles)[5] <- "Decil 4"
+colnames(correlacion_deciles)[6] <- "Decil 5"
+colnames(correlacion_deciles)[7] <- "Decil 6"
+colnames(correlacion_deciles)[8] <- "Decil 7"
+colnames(correlacion_deciles)[9] <- "Decil 8"
+colnames(correlacion_deciles)[10] <- "Decil 9"
+colnames(correlacion_deciles)[11] <- "Decil 10"
+
+
+# Transponer el data frame
+correlacion_deciles_transpuesto <- correlacion_deciles %>%
+  pivot_longer(cols = starts_with("Decil"), names_to = "Decil", values_to = "Valor") %>%
+  pivot_wider(names_from = Variable, values_from = Valor)
+
+# Cambiar los nombres de las filas
+rownames(correlacion_deciles_transpuesto) <- paste("Decil", 1:10, sep = "_")
+
+# Mostrar el data frame transpuesto
+print(correlacion_deciles_transpuesto)
+
 
 
 
 #---Notas y pendientes----------------------------------------------------------
-# Arreglar textos en ingles en seccion Graficos
+# 
 #
 
