@@ -253,13 +253,50 @@ ggplot(data.frame(
 #---Bloque Bryan----------------------------------------------------------------
 
 
+Nombres <- c("NA", "Both", "Male", "Female", "Ladder Score", "Standard Error of Ladder Score",
+             "Upperwhisker", "Lowerwhisker", "Logged GDP per Capita", "Social Support",
+             "Healthy Life Expectancy", "Freedom to Make Life Choices", "Generosity",
+             "Perception of Corruption", "Ladder Score in Dystopia",
+             "Explained by Logged GDP per Capita", "Explained by Social Support",
+             "Explained by Healthy Life Expectancy", "Explained by Freedom to Make Life Choices", 
+             "Explained by Generosity", "Explained by Perception of Corruption","Dystopia Residual" )
 
 
 
 
+Minimo <- 0
+Maximo <- 0
+Rango <- 0
+Media <- 0
+Mediana <- 0
+PrimerCuartil <- 0
+TercerCuartil <- 0
+RangoIntercuartil <- 0
+DesviacionStandar <- 0
+Varianza <- 0
+CoeficienteVariacion <- 0
 
 
+for(i in 2:22){
+  Minimo <- append(Minimo, min(base_datos[,i])) 
+  Maximo <- append(Maximo, max(base_datos[,i])) 
+  Rango <- append(Rango, max(base_datos[,i]) - min(base_datos[,i]))
+  Media <- append(Media, mean(base_datos[,i]))
+  Mediana <- append(Mediana, median(base_datos[,i]))
+  PrimerCuartil <- append(PrimerCuartil, quantile(base_datos[,i], 0.25))
+  TercerCuartil <- append(TercerCuartil, quantile(base_datos[,i], 0.75))
+  RangoIntercuartil <- append(RangoIntercuartil, IQR(base_datos[,i]))
+  DesviacionStandar <- append(DesviacionStandar, sd(base_datos[,i]))
+  Varianza <- append(Varianza, var(base_datos[,i]))
+  CoeficienteVariacion <- append(CoeficienteVariacion, sd(base_datos[,i])/
+                                   mean(base_datos[,i]))
+  
+}
 
+
+AnalisisD <- data.frame(Nombres, Minimo, Maximo, Rango, Media, PrimerCuartil,
+                        Mediana, TercerCuartil, RangoIntercuartil, DesviacionStandar,
+                        Varianza, CoeficienteVariacion)
 
 
 
