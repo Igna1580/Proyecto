@@ -686,8 +686,58 @@ tabla_latex1 <- xtable(
 )
 
 # Configurar opciones para ajustar la tabla a una sola página
+#options(xtable.comment = FALSE)
+#print(tabla_latex1, file = "tabla_deciles.tex", floating = FALSE, hline.after = c(-1, 0, nrow(promedio_felicidad_por_decil)))
+
+# Confirmar que se ha creado el archivo "tabla_deciles.tex"
+#list.files()
+
+# Cuadro 3: 
+
+# Calcular el índice de felicidad promedio, varianza, máximo y mínimo, y obtener los nombres de los países para cada región
+resumen_felicidad_por_region <- relacion_AlcoholYFelicidad2 %>%
+  group_by(Region) %>%
+  summarize(
+    Promedio_Consumo_Alcohol = mean(both),
+    Promedio_Índice_de_felicidad = mean(ladder_score),
+    Varianza_Índice_de_felicidad = var(ladder_score),
+    Máximo_Índice_de_felicidad = max(ladder_score),
+    Mínimo_Índice_de_felicidad = min(ladder_score)
+  )
+
+# Cambiar el orden de las columnas
+resumen_felicidad_por_region <- resumen_felicidad_por_region %>%
+  select("Region",
+    "Promedio_Consumo_Alcohol",
+    "Promedio_Índice_de_felicidad",
+    "Varianza_Índice_de_felicidad",
+    "Máximo_Índice_de_felicidad",
+    "Mínimo_Índice_de_felicidad"
+  )
+
+# Renombrar las columnas
+colnames(resumen_felicidad_por_region) <- c("Región",
+  "Promedio Consumo Alcohol",
+  "Promedio Índice de felicidad",
+  "Varianza Índice de felicidad",
+  "Máximo Índice de felicidad",
+  "Mínimo Índice de felicidad"
+  
+)
+
+# Mostrar el cuadro de resumen
+print(resumen_felicidad_por_region)
+
+# Crear la tabla LaTeX
+tabla_latex2 <- xtable(
+  resumen_felicidad_por_region,
+  caption = "Resumen Estadístico del Índice de Felicidad por Región",
+  label = "tab:resumen-felicidad-region"
+)
+
+# Configurar opciones para ajustar la tabla a una sola página
 options(xtable.comment = FALSE)
-print(tabla_latex1, file = "tabla_deciles.tex", floating = FALSE, hline.after = c(-1, 0, nrow(promedio_felicidad_por_decil)))
+print(tabla_latex2, file = "tabla_region.tex", floating = FALSE, hline.after = c(-1, 0, nrow(resumen_felicidad_por_region)))
 
 # Confirmar que se ha creado el archivo "tabla_deciles.tex"
 #list.files()
