@@ -4,8 +4,8 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(cowplot)
-
-
+library(nortest)
+library(xtable)
 
 
 #---CSV y formatos--------------------------------------------------------------
@@ -221,11 +221,6 @@ print(lil_test_alcohol) #p<0.05 => se puede rechazar la hipotesis nula (los dato
 
 
 
-
-
-
-
-
 #---Bloque Jose Ignacio---------------------------------------------------------
 
 #Buscando el paraemtro de maxima verosimilitud respecto a felicidad
@@ -281,23 +276,28 @@ relacion_AlcoholYFelicidad2 <- relacion_AlcoholYFelicidad %>%
   arrange(both)
 
 # Crear un gráfico de barras horizontales
+options(repr.plot.width = 4, repr.plot.height = 15)  # Aumenta la altura
 gráfico_Barras1 <- ggplot(relacion_AlcoholYFelicidad2, aes(x = both, y = reorder(country, both), fill = ladder_score)) +
   geom_bar(stat = "identity") +
   labs(
-    x = "Consumo de Alcohol",
+    x = "Promedio anual de consumo de alcohol puro per cápita en litros",
     y = "País",
-    title = "Consumo de Alcohol por País (Ordenado de mayor a menor)",
-    subtitle = "Codificado con Escala de Color según Índice de Felicidad",
+    title = "Consumo de alcohol por país (Ordenado de mayor a menor)",
+    subtitle = "Codificado con escala de color según Índice de Felicidad",
     fill = "Índice de Felicidad"
-  ) +
+  ) + 
+  scale_x_continuous(breaks = 0:13, labels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13")) +
   scale_fill_gradient(low = "red", high = "green") +  # Escala de colores de rojo a verde
   theme_minimal() + cowplot::theme_cowplot() + # Aplicar un tema minimalista
-  theme(axis.text.y = element_text(size = 3, hjust = 0),  # Ajustar el tamaño y alineación del texto en el eje y
-        plot.title = element_text(size = 8),
-        plot.subtitle = element_text(size = 7),# Ajustar el tamaño del título
-        legend.text = element_text(size = 4),  # Ajustar el tamaño del texto en el color key
-        legend.title = element_text(size = 4)) +  # Ajustar el tamaño del título del color key
-  guides(fill = guide_colorbar(barwidth = 2, barheight = 6))  # Ajustar el tamaño del color key
+  theme(axis.text.y = element_text(size = 7, hjust = 0, color = "black"),
+        axis.text.x = element_text(size = 7, hjust = 0, color = "black"),
+        axis.title.x = element_text(size = 10, color = "black"),  # Tamaño del título del eje x
+        axis.title.y = element_text(size = 10, color = "black"),# Ajustar el tamaño y alineación del texto en el eje y
+        plot.title = element_text(size = 11, color = "black"),
+        plot.subtitle = element_text(size = 11, color = "black"),# Ajustar el tamaño del título
+        legend.text = element_text(size = 10, color = "black"),  # Ajustar el tamaño del texto en el color key
+        legend.title = element_text(size = 10, color = "black")) +  # Ajustar el tamaño del título del color key
+  guides(fill = guide_colorbar(barwidth = 2, barheight = 6, title.position = "top"))  # Ajustar el tamaño del color key y su posición
 
 # Guardar el gráfico llamado "consumo_MenorAMayor_color"
 consumo_MenorAMayor_color <- gráfico_Barras1
@@ -305,11 +305,15 @@ consumo_MenorAMayor_color <- gráfico_Barras1
 # Mostrar el gráfico
 print(consumo_MenorAMayor_color)
 
+pdf("grafico_barras.pdf", width = 8.27, height = 11.69)  # Tamaño A4 en pulgadas
+print(gráfico_Barras1)
+ggsave("grafico_barras.pdf", width = 8.27, height = 11.69, dpi = 500)
+
 
 # Gráfico 2: Promedio de Consumo de Alcohol por Región, ordenado por Índice de Felicidad Promedio
-
-# Calcular los promedios por región
-promedios_region <- relacion_AlcoholYFelicidad %>%
+  
+  # Calcular los promedios por región
+  promedios_region <- relacion_AlcoholYFelicidad %>%
   group_by(Region) %>%
   summarise(
     Promedio_Alcohol = mean(both),
@@ -355,6 +359,7 @@ grafico_promedios <- ggplot(promedios_region, aes(x = reorder(Region, -Promedio_
 
 # Mostrar el gráfico
 grafico_promedios
+
 
 
 # Gráfico 3: Gráfico de dispersión con línea de regresión
@@ -465,7 +470,6 @@ print(caja_y_bigotes_deciles)
 
 # Gráfico 6: Índice de Felicidad Promedio por Decil de Consumo de Alcohol
 
-
 # Calcular el promedio del índice de felicidad para cada decil
 promedio_felicidad_por_decil <- relacion_AlcoholYFelicidad2 %>%
   group_by(decil_alcohol) %>%
@@ -473,22 +477,29 @@ promedio_felicidad_por_decil <- relacion_AlcoholYFelicidad2 %>%
 
 
 # Crear un gráfico de línea con límites personalizados en el eje x
+
 gráfico_Línea <- ggplot(promedio_felicidad_por_decil, aes(x = decil_alcohol, y = promedio_felicidad)) +
   geom_line() +
   labs(
-    x = "Decil de Consumo de Alcohol",
-    y = "Índice de Felicidad Promedio",
-    title = "Índice de Felicidad Promedio por Decil de Consumo de Alcohol"
+    x = "Decil según promedio del consumo anual en litros de alcohol puro per cápita",
+    y = "Índice de Felicidad promedio",
+    title = "Índice de Felicidad promedio según decil de consumo de alcohol"
   ) +
   theme_minimal() +
   cowplot::theme_cowplot() +
-  scale_x_continuous(breaks = 0:10)  # Establecer límites y marcas en el eje x
+  scale_x_continuous(breaks = 0:10) +  # Establecer límites y marcas en el eje x
+  theme(
+    plot.title = element_text(size = 12),  # Tamaño del título
+    axis.title.x = element_text(size = 10),  # Tamaño del título del eje x
+    axis.title.y = element_text(size = 10),  # Tamaño del título del eje y
+    axis.text.x = element_text(size = 10),  # Tamaño del texto del eje x
+    axis.text.y = element_text(size = 10)   # Tamaño del texto del eje y
+  )
 
 # Mostrar el gráfico de línea
 print(gráfico_Línea)
 
-# Mostrar el gráfico de línea
-print(gráfico_Línea)
+#ggsave(filename = "grafico_linea.pdf", plot = gráfico_Línea, device = "pdf", width = 8.27, height = 11.69)
 
 # Cuadro 1: Correlación entre Consumo de alcohol y variables de el índice de felicidad
 
@@ -516,7 +527,7 @@ for (region in regiones_unicas) {
   datos_region <- base_datos %>% filter(region == region)
   
   # Calcular la matriz de correlación
-  correlacion_matrix <- cor(datos_region[variables_interes])
+  correlacion_matrix <- cor(datos_region[variables_interes], method = "spearman")
   
   # Almacenar la matriz de correlación en la lista
   correlacion_matrices[[region]] <- correlacion_matrix
@@ -584,7 +595,7 @@ correlacion_deciles <- data.frame(Variable = variables_interes)
 # Calcular las correlaciones para cada decil y cada variable
 for (i in 1:10) {
   decil_data <- base_datos2 %>% filter(decil_alcohol == i)
-  correlaciones <- sapply(variables_interes, function(var) cor(decil_data$both, decil_data[[var]]))
+  correlaciones <- correlaciones <- sapply(variables_interes, function(var) cor(decil_data$both, decil_data[[var]], method = "spearman"))
   correlacion_deciles[paste("Decil_", i, sep = "")] <- correlaciones
 }
 
@@ -628,7 +639,58 @@ rownames(correlacion_deciles_transpuesto) <- paste("Decil", 1:10, sep = "_")
 # Mostrar el data frame transpuesto
 print(correlacion_deciles_transpuesto)
 
+# Cuadro 2: índice de felicidad promedio para cada decil 
 
+# Calcular el índice de felicidad promedio, varianza, máximo y mínimo, y obtener los nombres de los países para cada decil
+resumen_felicidad_por_decil <- relacion_AlcoholYFelicidad2 %>%
+  group_by(decil_alcohol) %>%
+  summarize(
+    Promedio_Índice_de_felicidad = mean(ladder_score),
+    Varianza_Índice_de_felicidad = var(ladder_score),
+    Máximo_Índice_de_felicidad = max(ladder_score),
+    Mínimo_Índice_de_felicidad = min(ladder_score)  
+  )
+
+# Cambiar los nombres de las columnas
+resumen_felicidad_por_decil <- resumen_felicidad_por_decil %>%
+  rename(
+    "Promedio" = Promedio_Índice_de_felicidad,
+    "Varianza" = Varianza_Índice_de_felicidad,
+    "Máximo" = Máximo_Índice_de_felicidad,
+    "Mínimo" = Mínimo_Índice_de_felicidad,
+    "Decil" = decil_alcohol
+  )
+
+# Mostrar el cuadro de resumen
+print(resumen_felicidad_por_decil)
+
+# Calcular el consumo promedio de alcohol para cada decil
+consumo_promedio_por_decil <- relacion_AlcoholYFelicidad2 %>%
+  group_by(decil_alcohol) %>%
+  summarize(Consumo_Promedio_Alcohol = mean(both))
+
+# Cambiar el nombre de la columna
+consumo_promedio_por_decil <- consumo_promedio_por_decil %>%
+  rename("Consumo Promedio de Alcohol" = Consumo_Promedio_Alcohol)
+consumo_promedio_por_decil <- consumo_promedio_por_decil %>%
+  rename("Decil" = decil_alcohol)
+
+# Mostrar el cuadro de resumen
+print(consumo_promedio_por_decil)
+
+# Crear la tabla LaTeX
+tabla_latex1 <- xtable(
+  resumen_felicidad_por_decil,
+  caption = "Resumen Estadístico del Índice de Felicidad por Decil de Consumo de Alcohol",
+  label = "tab:resumen-felicidad-decil"
+)
+
+# Configurar opciones para ajustar la tabla a una sola página
+options(xtable.comment = FALSE)
+print(tabla_latex1, file = "tabla_deciles.tex", floating = FALSE, hline.after = c(-1, 0, nrow(promedio_felicidad_por_decil)))
+
+# Confirmar que se ha creado el archivo "tabla_deciles.tex"
+#list.files()
 
 
 #---Notas y pendientes----------------------------------------------------------
