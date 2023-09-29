@@ -319,9 +319,9 @@ gráfico_Barras1 <- ggplot(relacion_AlcoholYFelicidad2, aes(x = both, y = reorde
   labs(
     x = "Promedio anual de consumo de alcohol puro per cápita en litros",
     y = "País",
-    title = "Consumo de alcohol por país (Ordenado de mayor a menor)",
-    subtitle = "Codificado con escala de color según Índice de Felicidad",
-    fill = "Índice de Felicidad"
+    title = "Consumo de alcohol por país ordenado de mayor a menor",
+    subtitle = "Codificado con escala de color según Índice de felicidad",
+    fill = "Índice de felicidad"
   ) + 
   scale_x_continuous(breaks = 0:13, labels = c("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13")) +
   scale_fill_gradient(low = "red", high = "green") +  # Escala de colores de rojo a verde
@@ -344,7 +344,7 @@ print(consumo_MenorAMayor_color)
 
 pdf("grafico_barras.pdf", width = 8.27, height = 11.69)  # Tamaño A4 en pulgadas
 print(gráfico_Barras1)
-ggsave("grafico_barras.pdf", width = 8.27, height = 11.69, dpi = 500)
+#ggsave("grafico_barras.pdf", width = 8.27, height = 11.69, dpi = 500)
 
 
 # Gráfico 2: Promedio de Consumo de Alcohol por Región, ordenado por Índice de Felicidad Promedio
@@ -371,31 +371,36 @@ promedios_region$Region <- case_when(
   TRUE ~ promedios_region$Region  # Mantener otros nombres sin cambios
 )
 
+
+
 # Crear el gráfico de barras
 grafico_promedios <- ggplot(promedios_region, aes(x = reorder(Region, -Promedio_Felicidad), y = Promedio_Alcohol, fill = Promedio_Felicidad)) +
   geom_bar(stat = "identity") +
   labs(
     x = "Región",
-    y = "Promedio de Consumo de Alcohol",
-    title = "Promedio de Consumo de Alcohol por Región",
-    subtitle = "Ordenado por Índice de Felicidad Promedio"
+    y = "Promedio de consumo de alcohol",
+    title = "Promedio de consumo de alcohol por región",
+    subtitle = "Ordenado por Índice de felicidad promedio"
   ) +
   theme_minimal() +
   cowplot::theme_cowplot() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
-    axis.title.x = element_text(size = 10), # Ajustar el tamaño del texto del eje x
-    axis.title.y = element_text(size = 10),
-    plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "cm"),  # Aumentar el margen derecho
-    legend.position = c(0.9, 0.95),  # Colocar la leyenda en la esquina superior derecha
-    legend.title = element_text(size = 10),  # Tamaño del título de la leyenda
-    legend.text = element_text(size = 8)  # Tamaño del texto de la leyenda (nombre de la barra de colores)
+    plot.title = element_text(size = 20),  # Tamaño del título
+    plot.subtitle = element_text(size = 18),  # Tamaño del subtítulo
+    axis.title.x = element_text(size = 18),  # Tamaño del título del eje x
+    axis.title.y = element_text(size = 18),  # Tamaño del título del eje y
+    axis.text.x = element_text(size = 18, angle = 45, hjust = 1),  # Texto del eje x inclinado
+    axis.text.y = element_text(size = 18),  # Tamaño del texto del eje y
+    plot.margin = margin(20, 20, 20, 20)  # Márgenes del gráfico
   ) + 
-  scale_fill_gradient(low = "red", high = "green", name = "Índice de Felicidad") +
-  geom_text(aes(label = round(Promedio_Felicidad, 2)), vjust = -0.5, size = 3)  # Agregar etiquetas de promedio de felicidad arriba de las barras
+  scale_fill_gradient(low = "red", high = "green", name = "Índice de felicidad") +
+  geom_text(aes(label = round(Promedio_Felicidad, 2)), vjust = -0.5)  # Ajustar el tamaño del texto a 18
 
 # Mostrar el gráfico
 grafico_promedios
+
+# Ajustar el tamaño del gráfico (ancho y alto)
+ggsave(filename = "grafico_barras2.pdf", plot = grafico_promedios, device = "pdf", width = 10, height = 8)
 
 
 
@@ -406,13 +411,25 @@ grafico_dispersion <- ggplot(relacion_AlcoholYFelicidad, aes(x = both, y = ladde
   geom_point() + cowplot::theme_cowplot() +  # Gráfico de dispersión
   geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Línea de regresión
   labs(
-    x = "Consumo de Alcohol",
-    y = "Índice de Felicidad",
-    title = "Gráfico de Dispersión con Línea de Regresión"
+    x = "Consumo de alcohol en litros de alcohol puro",
+    y = "Índice de felicidad",
+    title = "Gráfico de dispersión con línea de regresión",
+    subtitle = "Relación Índice de felicidad y consumo de alcohol"
+  ) +
+  theme(
+    plot.title = element_text(size = 20),
+    plot.subtitle = element_text(size = 18),# Tamaño del título
+    axis.title.x = element_text(size = 18),  # Tamaño del título del eje x
+    axis.title.y = element_text(size = 18),  # Tamaño del título del eje y
+    axis.text.x = element_text(size = 18),  # Tamaño del texto del eje x
+    axis.text.y = element_text(size = 18),  # Tamaño del texto del eje y
+    plot.margin = margin(20, 20, 20, 20)  # Márgenes del gráfico
   )
 
 # Mostrar el gráfico 
 print(grafico_dispersion)
+# Ajustar el tamaño del gráfico (ancho y alto)
+ggsave(filename = "grafico_dispersion.pdf", plot = grafico_dispersion, device = "pdf", width = 10, height = 8)
 
 
 # Gráfico 4: Gráfico de Caja y Bigotes del Índice de Felicidad del 30% de los Países con Mayor Consumo de Alcohol
@@ -515,28 +532,32 @@ promedio_felicidad_por_decil <- relacion_AlcoholYFelicidad2 %>%
 
 # Crear un gráfico de línea con límites personalizados en el eje x
 
+# Crear el gráfico de línea con líneas verticales y horizontales de referencia
 gráfico_Línea <- ggplot(promedio_felicidad_por_decil, aes(x = decil_alcohol, y = promedio_felicidad)) +
   geom_line() +
   labs(
-    x = "Decil según promedio del consumo anual en litros de alcohol puro per cápita",
-    y = "Índice de Felicidad promedio",
-    title = "Índice de Felicidad promedio según decil de consumo de alcohol"
+    x = "Decil",
+    y = "Índice de felicidad promedio",
+    title = "Índice de felicidad promedio según decil de consumo de alcohol"
   ) +
   theme_minimal() +
   cowplot::theme_cowplot() +
-  scale_x_continuous(breaks = 0:10) +  # Establecer límites y marcas en el eje x
+  scale_x_continuous(breaks = 0:10) +
   theme(
-    plot.title = element_text(size = 12),  # Tamaño del título
-    axis.title.x = element_text(size = 10),  # Tamaño del título del eje x
-    axis.title.y = element_text(size = 10),  # Tamaño del título del eje y
-    axis.text.x = element_text(size = 10),  # Tamaño del texto del eje x
-    axis.text.y = element_text(size = 10)   # Tamaño del texto del eje y
-  )
+    plot.title = element_text(size = 20),
+    axis.title.x = element_text(size = 18),
+    axis.title.y = element_text(size = 18),
+    axis.text.x = element_text(size = 18),
+    axis.text.y = element_text(size = 18),
+    plot.margin = margin(20, 20, 20, 20)
+  ) +
+  # Agregar líneas verticales y horizontales
+  geom_vline(xintercept = 1:10, linetype = "dashed", color = "gray", linewidth = 0.5) +
+  geom_hline(yintercept = seq(4, 8, 1), linetype = "dashed", color = "gray", linewidth= 0.5)
 
-# Mostrar el gráfico de línea
-print(gráfico_Línea)
+# Ajustar el tamaño del gráfico (ancho y alto)
+ggsave(filename = "grafico_linea.pdf", plot = gráfico_Línea, device = "pdf", width = 10, height = 8)
 
-#ggsave(filename = "grafico_linea.pdf", plot = gráfico_Línea, device = "pdf", width = 8.27, height = 11.69)
 
 # Cuadro 1: Correlación entre Consumo de alcohol y variables de el índice de felicidad
 
@@ -602,7 +623,7 @@ correlacion_datos <- correlacion_datos %>%
   arrange(desc(Variable == "ladder_score"))
 
 # Nuevos nombres de las variables
-nuevos_nombres <- c("Indice de felicidad", "Seguro Social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
+nuevos_nombres <- c("Indice de felicidad", "Apoyo social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
 
 # Cambiar los nombres de las variables
 correlacion_datos <- correlacion_datos %>%
@@ -648,7 +669,7 @@ correlacion_deciles <- correlacion_deciles %>%
   arrange(desc(Variable == "ladder_score"))
 
 # Nuevos nombres de las variables
-nuevos_nombres <- c("Indice de felicidad", "Seguro Social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
+nuevos_nombres <- c("Indice de felicidad", "Apoyo social", "Esperanza de vida saludable", "Libertad para la toma de decisiones", "Generosidad","Percepciones de corrupción")
 
 # Cambiar los nombres de las variables
 correlacion_deciles$Variable <- nuevos_nombres
@@ -775,6 +796,70 @@ tabla_latex2 <- xtable(
 # Configurar opciones para ajustar la tabla a una sola página
 options(xtable.comment = FALSE)
 print(tabla_latex2, file = "tabla_region.tex", floating = FALSE, hline.after = c(-1, 0, nrow(resumen_felicidad_por_region)))
+
+# Confirmar que se ha creado el archivo "tabla_deciles.tex"
+#list.files()
+
+
+# copia de cuadro de Bryan para editarlo y ponerlo en latex
+
+
+
+Nombres <- c("NA", "Both", "Male", "Female", "Ladder Score", "Standard Error of Ladder Score",
+             "Upperwhisker", "Lowerwhisker", "Logged GDP per Capita", "Social Support",
+             "Healthy Life Expectancy", "Freedom to Make Life Choices", "Generosity",
+             "Perception of Corruption", "Ladder Score in Dystopia",
+             "Explained by Logged GDP per Capita", "Explained by Social Support",
+             "Explained by Healthy Life Expectancy", "Explained by Freedom to Make Life Choices", 
+             "Explained by Generosity", "Explained by Perception of Corruption","Dystopia Residual" )
+
+
+
+
+Minimo <- 0
+Maximo <- 0
+Rango <- 0
+Media <- 0
+Mediana <- 0
+PrimerCuartil <- 0
+TercerCuartil <- 0
+RangoIntercuartil <- 0
+DesviacionStandar <- 0
+Varianza <- 0
+CoeficienteVariacion <- 0
+
+
+for(i in 2:22){
+  Minimo <- append(Minimo, min(base_datos[,i])) 
+  Maximo <- append(Maximo, max(base_datos[,i])) 
+  Rango <- append(Rango, max(base_datos[,i]) - min(base_datos[,i]))
+  Media <- append(Media, mean(base_datos[,i]))
+  Mediana <- append(Mediana, median(base_datos[,i]))
+  PrimerCuartil <- append(PrimerCuartil, quantile(base_datos[,i], 0.25))
+  TercerCuartil <- append(TercerCuartil, quantile(base_datos[,i], 0.75))
+  RangoIntercuartil <- append(RangoIntercuartil, IQR(base_datos[,i]))
+  DesviacionStandar <- append(DesviacionStandar, sd(base_datos[,i]))
+  Varianza <- append(Varianza, var(base_datos[,i]))
+  CoeficienteVariacion <- append(CoeficienteVariacion, sd(base_datos[,i])/
+                                   mean(base_datos[,i]))
+  
+}
+
+
+AnalisisD <- data.frame(Nombres, Minimo, Maximo, Rango, Media, PrimerCuartil,
+                        Mediana, TercerCuartil, RangoIntercuartil, DesviacionStandar,
+                        Varianza, CoeficienteVariacion)
+
+# Crear la tabla LaTeX
+tabla_latex4 <- xtable(
+  AnalisisD,
+  caption = "Análisis descriptivo completo",
+  label = "tab:analisisDescriptivo"
+)
+
+# Configurar opciones para ajustar la tabla a una sola página
+options(xtable.comment = FALSE)
+print(tabla_latex4, file = "analisis_descriptivo.tex", floating = FALSE, hline.after = c(-1, 0, nrow(AnalisisD)))
 
 # Confirmar que se ha creado el archivo "tabla_deciles.tex"
 #list.files()
