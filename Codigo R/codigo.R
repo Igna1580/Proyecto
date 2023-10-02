@@ -6,6 +6,7 @@ library(plotly)
 library(cowplot)
 library(nortest)
 library(xtable)
+library(moments)
 
 
 #---CSV y formatos--------------------------------------------------------------
@@ -246,8 +247,11 @@ Grafico_max_ver_alcohol <- ggplot(data = base_datos, aes(x = both)) +
   )
 Grafico_max_ver_alcohol
 
+#Coeficiente de asimetría de Fisher
+coef.asim.Fish <- skewness(base_datos$ladder_score) #No es cercano a 1, no es simetrica
 
-
+#Coeficiente de aplastamiento o curtosis de Fisher}
+curtosis.Fish <- kurtosis(base_datos$ladder_score) #Es casi igual de aplastada que una normal
 
 
 #---Bloque Bryan----------------------------------------------------------------
