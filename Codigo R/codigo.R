@@ -223,28 +223,28 @@ print(lil_test_alcohol) #p<0.05 => se puede rechazar la hipotesis nula (los dato
 
 #---Bloque Jose Ignacio---------------------------------------------------------
 
-#Buscando el paraemtro de maxima verosimilitud respecto a felicidad
-n = length(base_datos$ladder_score)
-sum.felicidad = sum(base_datos$ladder_score)
-mu = sum.felicidad/n
-sigma.cuadrado = (sum((base_datos$ladder_score-mu)^2))/n
-theta = seq(1.778, 7.804, length.out = 1000)
-
-#Grafico de Maxima Verosimilitud
-ggplot(data.frame(
-  theta = theta,
-  L = (1/sqrt(2*pi*sigma.cuadrado))*exp((-(theta-mu)^2)/(2*sigma.cuadrado))), 
-  aes(x = theta , y = L)) +
-  geom_line(linewidth = 2) +
-  geom_vline(aes(xintercept = mean(base_datos$ladder_score)), linewidth = 2, color = "red") +
+#Grefico de maxima verosimilitud respecto a felicidad
+Grafico_max_ver_felicidad <- ggplot(data = base_datos, aes(x = ladder_score)) +
+  geom_histogram(aes(y = ..density..), binwidth = 0.5, fill = "blue", color = "black", alpha = 0.5) +
+  stat_function(fun = dnorm, args = list(mean = mean(base_datos$ladder_score), sd = sd(base_datos$ladder_score)), size = 1) +
   cowplot::theme_cowplot() +
   labs(
-    title = "Verosimilitud con la media de x", x = "Theta", y =
-      "Verosimilitud"
+    title = "Verosimilitud respecto al \níndice de felicidad", x = "Índice de felicidad", y =
+      "Densidad"
   )
+Grafico_max_ver_felicidad
 
 
-
+#Grafico de maxima verosimilitud respecto a consumo de alcohol
+Grafico_max_ver_alcohol <- ggplot(data = base_datos, aes(x = both)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "blue", color = "black", alpha = 0.5) +
+  geom_density(size = 1) +
+  cowplot::theme_cowplot() +
+  labs(
+    title = "Verosimilitud respecto al \nconsumo de alcohol", x = "Consumo de alcohol", y =
+      "Densidad"
+  )
+Grafico_max_ver_alcohol
 
 
 
