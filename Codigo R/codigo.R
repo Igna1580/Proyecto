@@ -1,5 +1,17 @@
+
 # Relación entre el índice de felicidad y el consumo de alcohol promedio para 131 paises
 # Por: Jose Ignacio Rojas, Bryan Campos, Valeria Vásquez, Montserrat Beirute
+
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(cowplot)
+library(nortest)
+library(xtable)
+library(moments)
+
 
 #---Paquetes--------------------------------------------------------------
 library(tidyverse) # manipulación, visualización y análisis de datos
@@ -397,6 +409,7 @@ lil_test_alcohol <- lillie.test(base_datos$poblacion_Total_consumo)
 
 #---Bloque Jose Ignacio---------------------------------------------------------
 
+
 # Datos de Felicidad
 
 # Buscando el parametro de máxima verosimilitud respecto a felicidad
@@ -461,6 +474,36 @@ curtosis.Fish <- kurtosis(base_datos$indice_de_felicidad)
 
 # curtosis de Fisher: 0.009130095
 # Es casi igual de aplastada que una normal
+
+#Grefico de maxima verosimilitud respecto a felicidad
+Grafico_max_ver_felicidad <- ggplot(data = base_datos, aes(x = ladder_score)) +
+  geom_histogram(aes(y = ..density..), binwidth = 0.5, fill = "blue", color = "black", alpha = 0.5) +
+  stat_function(fun = dnorm, args = list(mean = mean(base_datos$ladder_score), sd = sd(base_datos$ladder_score)), size = 1) +
+  cowplot::theme_cowplot() +
+  labs(
+    title = "Verosimilitud respecto al \níndice de felicidad", x = "Índice de felicidad", y =
+      "Densidad"
+  )
+Grafico_max_ver_felicidad
+
+
+#Grafico de maxima verosimilitud respecto a consumo de alcohol
+Grafico_max_ver_alcohol <- ggplot(data = base_datos, aes(x = both)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "blue", color = "black", alpha = 0.5) +
+  geom_density(size = 1) +
+  cowplot::theme_cowplot() +
+  labs(
+    title = "Verosimilitud respecto al \nconsumo de alcohol", x = "Consumo de alcohol", y =
+      "Densidad"
+  )
+Grafico_max_ver_alcohol
+
+#Coeficiente de asimetría de Fisher
+coef.asim.Fish <- skewness(base_datos$ladder_score) #No es cercano a 1, no es simetrica
+
+#Coeficiente de aplastamiento o curtosis de Fisher}
+curtosis.Fish <- kurtosis(base_datos$ladder_score) #Es casi igual de aplastada que una normal
+
 
 
 #---Bloque Bryan----------------------------------------------------------------
