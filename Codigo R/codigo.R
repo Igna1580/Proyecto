@@ -486,26 +486,6 @@ Grafico_max_ver_felicidad <- ggplot(data = base_datos, aes(x = ladder_score)) +
   )
 Grafico_max_ver_felicidad
 
-
-#Grafico de maxima verosimilitud respecto a consumo de alcohol
-Grafico_max_ver_alcohol <- ggplot(data = base_datos, aes(x = both)) +
-  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "blue", color = "black", alpha = 0.5) +
-  geom_density(size = 1) +
-  cowplot::theme_cowplot() +
-  labs(
-    title = "Verosimilitud respecto al \nconsumo de alcohol", x = "Consumo de alcohol", y =
-      "Densidad"
-  )
-Grafico_max_ver_alcohol
-
-#Coeficiente de asimetría de Fisher
-coef.asim.Fish <- skewness(base_datos$ladder_score) #No es cercano a 1, no es simetrica
-
-#Coeficiente de aplastamiento o curtosis de Fisher}
-curtosis.Fish <- kurtosis(base_datos$ladder_score) #Es casi igual de aplastada que una normal
-
-
-
 #---Bloque Bryan----------------------------------------------------------------
 
 # Cuadro de Resumen Estadístico completo 
