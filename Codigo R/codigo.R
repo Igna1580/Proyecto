@@ -2,16 +2,6 @@
 # Relación entre el índice de felicidad y el consumo de alcohol promedio para 131 paises
 # Por: Jose Ignacio Rojas, Bryan Campos, Valeria Vásquez, Montserrat Beirute
 
-library(tidyverse)
-library(janitor)
-library(dplyr)
-library(ggplot2)
-library(plotly)
-library(cowplot)
-library(nortest)
-library(xtable)
-library(moments)
-
 
 #---Paquetes--------------------------------------------------------------
 library(tidyverse) # manipulación, visualización y análisis de datos
@@ -26,6 +16,8 @@ library(boot) # facilita la herramienta de bootstrap
 # Abrir y dar formato a las bases de datos
 
 # Base de datos de alcohol
+# Fuente: World Population Review
+
 consumo_alcohol <- read.csv("alcohol-consumption-by-country-2023.csv")
 consumo_alcohol <- clean_names(consumo_alcohol)
 
@@ -37,6 +29,7 @@ consumo_alcohol <- consumo_alcohol %>% rename(mujeres_consumo =  female)
 
 
 # Base de datos felicidad
+# Fuente:  Gallup World Poll
 felicidad <- read.csv("WHR2023.csv")
 felicidad <- clean_names(felicidad)
 
@@ -64,12 +57,26 @@ felicidad <- felicidad %>%
 consumo_alcohol <- consumo_alcohol %>%
   mutate(pais = ifelse(pais == "DR Congo", "Congo (Brazzaville)", pais))
 
-# Nota: los siguientes paises sólo tenemos la información de felicidad pero no del consumo de alcohol: Czechia, Taiwan Province of China, Kosovo, Hong Kong S.A.R. of China, State of Palestine, Congo (Kinshasa). Se decide eliminar estos casos. 
 
+# Nota: los siguientes paises sólo tenemos la información de felicidad pero no del consumo de alcohol: Czechia, Taiwan Province of China, Kosovo, Hong Kong S.A.R. of China, State of Palestine, Congo (Kinshasa). Se decide eliminar estos casos. 
+ 
 
 # Procedemos a unir las dos bases de datos 
 columnas_felicidad <- c("indice_de_felicidad", "error_estandar_indice_de_felicidad", "bigote_superior", "bigote_inferior", "log_pib_per_capita", "apoyo_social", "esperanza_de_vida_saludable", "libertad_para_toma_de_decisiones", "generosidad", "percepcion_de_corrupcion")
 base_datos <- inner_join(consumo_alcohol, select(felicidad, pais, all_of(columnas_felicidad)), by = "pais")
+
+# Contamos con la información 131 países. 
+# Decidimos incluir las siguientes columnas para realizar el análisis. 
+# A continuación detallamos que información contiene cada columna:
+
+# pais: nombre de los paises 
+# poblacion_Total_consumo: consumo anual per cápita en litros de alcohol puro de los países para la población total
+# hombres_consumo: consumo anual per cápita en litros de alcohol puro de los países para hombres
+# mujeres_consumo: consumo anual per cápita en litros de alcohol puro de los países para mujeres
+# indice_de_felicidad: El Índice de felicidad es un índice para cada país publicado anualmente por las Naciones Unidas en el World Happiness Report (WHR) el cual es un promedio nacional de la suma de  respuestas a la pregunta del Gallup World Poll (GWP): 
+#                      "Por favor imagina una escalera, con escalones desde el 0 abajo y 10 arriba. El 10 representa la mejor vida posible para ti y el 0 la peor vida posible para ti. ¿En cual escalón dirías que te sientes personalmente ahora mismo?"
+# error_estandar_indice_de_felicidad: error estándar del índice de felicidad
+# bigote_superior: 
 
 # Crear una nueva columna con la region correspondiente a cada país, la llamamos "Region"
 base_datos <- base_datos %>%
@@ -475,16 +482,6 @@ curtosis.Fish <- kurtosis(base_datos$indice_de_felicidad)
 # curtosis de Fisher: 0.009130095
 # Es casi igual de aplastada que una normal
 
-#Grefico de maxima verosimilitud respecto a felicidad
-Grafico_max_ver_felicidad <- ggplot(data = base_datos, aes(x = ladder_score)) +
-  geom_histogram(aes(y = ..density..), binwidth = 0.5, fill = "blue", color = "black", alpha = 0.5) +
-  stat_function(fun = dnorm, args = list(mean = mean(base_datos$ladder_score), sd = sd(base_datos$ladder_score)), size = 1) +
-  cowplot::theme_cowplot() +
-  labs(
-    title = "Verosimilitud respecto al \níndice de felicidad", x = "Índice de felicidad", y =
-      "Densidad"
-  )
-Grafico_max_ver_felicidad
 
 #---Bloque Bryan----------------------------------------------------------------
 
@@ -505,7 +502,7 @@ Minimo <- Maximo <- Rango <- Media <- Mediana <- PrimerCuartil <- TercerCuartil 
 
 # Llenar cada uno de los vectores
 
-for(i in 2:(num_columnas - 1)){  # Excluye la última columna
+for(i in 2:(num_columnas - 1)){  
   Minimo <- append(Minimo, min(base_datos[, i])) 
   Maximo <- append(Maximo, max(base_datos[, i])) 
   Rango <- append(Rango, max(base_datos[, i]) - min(base_datos[, i]))
@@ -858,3 +855,147 @@ print(resumen_felicidad_por_region)
 # print(tabla_latex2, file = "tabla_region.tex", floating = FALSE, hline.after = c(-1, 0, nrow(resumen_felicidad_por_region)))
 
 
+# Bootstrap 
+
+# Queremos contruir la distribución del coeficiente de correlación de Spearman
+# Para ello, utilizamos la función boot, la cual considera la muestra original como la verdadera. 
+# Nuestra muestra original tiene 131 datos, para los cuales tenemos datos de consumo de alcohol y el índice de felicidad, entonces la función lo que hace es agarrar 131 pares de datos aleatoriamente de la muestra original, los pares pueden repetirse y hace una muestra nueva. 
+# A esa muestra nueva, le calcula el coeficiente de correlación de spearman, y lo almacena en un vector. 
+# Este proceso lo repite 1000 veces y al final utilizamos ese vector para observar al distribución del coeficiente de correlación. 
+
+bootstrap_distribución_coeficiente <- boot(base_datos[c("poblacion_Total_consumo","indice_de_felicidad")], 
+                                           statistic = function(data, i) {
+                                             cor(data[i, "poblacion_Total_consumo"], data[i, "indice_de_felicidad"], method='spearman')
+                                           },
+                                           R = 1000)
+
+ # Para visualizar los 1000 coeficientes de correlación
+
+   # bootstrap_distribución_coeficiente$t
+
+ # Crear un histograma de las muestras bootstrap
+  
+    hist(bootstrap_distribución_coeficiente$t, main = "Distribución Bootstrap del Coeficiente de Correlación de Spearman",
+      xlab = "Coeficiente de Correlación de Spearman", col = "lightblue", border = "black")
+
+ # Pruebas de hipotesis de normalidad 
+    
+    # Hipotesis nula (H0): Los datos de la distribución del coeficiente de correlación de Spearman por metodo bootstrap siguen una distribución normal
+    # Hipotesis alternativa (H1): Los datos de la distribución del coeficiente de correlación de Spearman por metodo bootstrap NO siguen una distribución normal
+    
+    # Prueba de Kolmogrov-Smirnov
+    
+     ks_test_coeficiente <- ks.test(
+       bootstrap_distribución_coeficiente$t,  # Los datos que se están probando
+       "pnorm",                        # La distribución teórica con la cual estamos comparando que en este caso, una distribución normal estándar
+       mean = mean(bootstrap_distribución_coeficiente$t),  # La media  de los datos de la correlación
+       sd = sd(bootstrap_distribución_coeficiente$t)) 
+     
+       # p-value = 0.1905
+       # D = 0.034281
+       # alternative hypothesis: two-sided
+       # p > 0.05 => No tenemos suficiente evidencia para rechazar la hipotesis nula, es decir , los resultados de la prueba de Lilliefors no sugieren que los datos del coeficiente de correlación de spearman sean significativamente diferentes de una distribución normal. 
+
+     # Prueba de Anderson-Darling
+     
+       ad_test_coeficiente <- ad.test(bootstrap_distribución_coeficiente$t)
+     
+       # p-value = 0.0001284
+       # A = 1.8054
+       # p < 0.05  Se puede rechazar la hipotesis nula es decir, los resultados de la prueba de Anderson-Darling sugieren que los datos del coeficiente de correlación son significativamente diferentes de una distribución normal. 
+       
+       
+     # Prueba de Lilliefors
+       
+       lil_test_felicidad <- lillie.test(bootstrap_distribución_coeficiente$t)
+       
+       # p-value = 0.007604
+       # A = 0.034281
+       # p < 0.05  Se puede rechazar la hipotesis nula es decir, los resultados de la prueba de Anderson-Darling sugieren que los datos del coeficiente de correlación son significativamente diferentes de una distribución normal. 
+       
+    # según las últimas dos pruebas, se rechaza la hipotesis nula de que la distribucion bootstrap del coeficiente de correalación de Spearman siga una distribución normal
+
+  # Intervalos de confianza para el método bootstrap 
+       
+    # Calculamos la desviación estándar de los coeficientes de correlación de Spearman
+      
+      sd_boot_spearman <- sd(bootstrap_distribución_coeficiente$t)
+     
+    # Almacenamos la correlación entre consumo de alcohol y el índice de felicidad 
+      
+      r <- cor(base_datos2$poblacion_Total_consumo, base_datos2$indice_de_felicidad, method = "spearman")
+      
+    # Para un nivel de confianza del 95%, buscamos el valor que deja un 2.5% de probabilidad en la cola derecha de una distribución normal est. 
+    
+      z <- qnorm(0.975)
+      
+    # Calculamos los intervalos de confianza para el método de bootstrap
+      
+      lower_bootstrap <- r - z * sd_boot_spearman
+         # Intervalo de confianza inferior = 0.4260255
+    
+      upper_bootstrap <- r + z * sd_boot_spearman
+         # Intervalo de confianza superior = 0.6785869
+      
+      # Interpretación: El intervalo [0.4260255, 0.6785869] contiente el coeficiente 
+      # de correlación de spearman entre el consumo de alcohol y el índice de feli-
+      # cidad con un nivel de confianza del 95%. 
+      
+      
+      # Media de la distribución del coeficiente de correlación
+      
+      media_distribucion <- mean(bootstrap_distribución_coeficiente$t)
+      
+      # Crear un gráfico de densidad
+      plot_densidad <- density(bootstrap_distribución_coeficiente$t)
+      
+     
+      # Abre el dispositivo de salida PDF
+      # pdf("grafico_distribucion_spearman.pdf", width = 8, height = 6)
+      
+      plot(plot_densidad, main = "",
+           xlab = "Coeficiente de Correlación de Spearman", ylab = "Densidad", col = "blue", border = "black") +
+        polygon(c(lower_bootstrap, plot_densidad$x, upper_bootstrap), 
+                c(0, plot_densidad$y, 0), col = "lightblue", border = "black") +
+        abline(v = c(lower_bootstrap, upper_bootstrap), col = "red", lwd = 2, lty = 2) +
+        abline(v = media_distribucion, col = "black", lwd = 1) +
+        text(lower_bootstrap, 0.005, "Límite Inferior = 0.43", srt = 90, adj = c(-0.5, -0.5)) +
+        text(upper_bootstrap, 0.005, "Límite Superior = 0.69", srt = 90, adj = c(-0.5, -0.5)) +
+        text(media_distribucion, 0.005, "Media = 0.55", srt = 90, adj = c(-0.3, -0.5), col = "black") +
+        cowplot::theme_cowplot()
+      
+      
+      # Cierra el dispositivo de salida PDF
+      # dev.off()
+     
+  # Intervalos de confianza método delta, ajustado a spearman
+      
+    # función inversa de la tangente hiperbólica
+      
+      d <- atanh(r)
+    
+    # Varianza ajustada de los coeficientes de correlación de Spearman
+      
+      var_d <- (1+(r^2)/2)/(nrow(base_datos)-3)
+      
+    # Intervalo de confianza inferior
+      
+      lower_delta <- tanh(d - z*sqrt(var_d))
+      # lower_delta = 0.41088
+      
+    # Intervalo de confianza superior 
+      
+      upper_delta <- tanh(d + z*sqrt(var_d))
+      # upper_delta <- 0.6683053
+      
+  # Diferencias entre los intervalos de confianza 
+      
+      dif_inferior <- abs(lower_bootstrap-lower_delta)
+      # dif_inferor <- 0.01594069
+      
+      dif_superior <- abs(upper_bootstrap-upper_delta)
+      # dif_superior <- 0.01028162
+  
+  
+     
+      
