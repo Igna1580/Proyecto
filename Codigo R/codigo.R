@@ -1298,10 +1298,10 @@ plot(plot_densidad, main = "",
      polygon(c(lower_bootstrap, plot_densidad$x, upper_bootstrap), 
      c(0, plot_densidad$y, 0), col = "lightblue") +
      abline(v = c(lower_bootstrap, upper_bootstrap), col = "red", lwd = 2, lty = 2) +
-     abline(v = media_distribucion, col = "black", lwd = 1) +
+     abline(v = media_dist, col = "black", lwd = 1) +
      text(lower_bootstrap, 0.005, "Límite Inferior = 0.43", srt = 90, adj = c(-0.5, -0.5)) +
      text(upper_bootstrap, 0.005, "Límite Superior = 0.69", srt = 90, adj = c(-0.5, -0.5)) +
-     text(media_distribucion, 0.005, "Media = 0.55", srt = 90, adj = c(-0.3, -0.5), col = "black") +
+     text(media_dist, 0.005, "Media = 0.55", srt = 90, adj = c(-0.3, -0.5), col = "black") +
      cowplot::theme_cowplot()
       
       
