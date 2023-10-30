@@ -943,7 +943,7 @@ print(resumen_felicidad_por_region)
 # -- También vemos que tenemos 40 países en la región de Europa. 
 # -- Vemos que la varianza más alta en relación al índice de felicidad la tiene la región de Medio Oriente, Norte de Africa y Gran Arabia. Esto tiene sentido cuando analizamos que el I.F. máximo es de 7.47, pero el promedio está en 1.21.
 # -- Si comparamos las regiones de Centroamérica y el Caribe con Suramérica que tienen cantidad de países similares, en Suramérica tienen un promedio de cosnumo de alcohol más alto, pero tienen un promedio de I.F. más bajo. 
-# -- Si analizamos por regiones, vemos que las regiones de Africa Subhariana, Asia, Centroamerica y el Caribe, Medio Oriente, Norte de Africa y Gran Arabia, tienen un consumo promedio de alcohol en litros de alcohol puro menor al promedio muestral de 6.23. 
+# -- Si analizamos por regiones, vemos que las regiones de Africa Sub-sahariana, Asia, Centroamerica y el Caribe, Medio Oriente, Norte de Africa y Gran Arabia, tienen un consumo promedio de alcohol en litros de alcohol puro menor al promedio muestral de 6.23. 
 # -- Por su parte, las regiones de Africa Sub-sahariana, Asia, Medio Oriente, Norte de Africa y Gran Arabia tienen un índice de felicidad promedio menor al promedio muestral de 5.54. 
 
 # 2a.2 Crear la tabla LaTeX
@@ -1089,7 +1089,7 @@ print(correlaciones_Regiones)
 
 # 3a.2.5 Resultados interesantes
 
-# -- Europa: La correlación más significativa entre consumo de alcohol de la población total y las variables del WHR es negativa y es generosidad con una correlación débil de -0.03. 
+# -- Europa: La correlación más significativa entre consumo de alcohol de la población total y las variables del WHR es negativa y es generosidad con una correlación débil de -0.30. 
 #           Es decir, parece ser a medida que aumenta el consumo de alcohol, la generosidad en esta región es menor. 
 # -- Africa Sub-sahariana: En esta región, la correlación más significativa entre el consumo de alcohol y las variables es la de apoyo social. La relación es positiva y de 0.43. 
 #                         Entonces en esta región, en cierto grado, a medida que aumenta el consumo de alcohol, aumenta también el apoyo social. 
@@ -1146,11 +1146,11 @@ print(correlaciones_Deciles)
 
 # 3b. Construir la función de distribución del coeficiente de correlación. 
 
-# - Queremos contruir la distribución del coeficiente de correlación de Spearman, lo cual lo haremo utilizando el método de Bootstrap.
+# - Queremos contruir la distribución del coeficiente de correlación de Spearman, lo cual lo haremos utilizando el método de Bootstrap.
 # - Para ello, utilizamos la función boot, la cual considera la muestra original como la verdadera. 
 # - Nuestra muestra original tiene 131 datos, para los cuales tenemos datos de consumo de alcohol y el índice de felicidad, entonces la función lo que hace es agarrar 131 pares de datos aleatoriamente de la muestra original, los pares pueden repetirse y hace una muestra nueva de 131 datos. 
 # - A esa muestra nueva, le calcula el coeficiente de correlación de spearman, y lo almacena en un vector. 
-# - Este proceso lo repite 1000 veces y al final utilizamos ese vector para observar al distribución del coeficiente de correlación. 
+# - Este proceso lo repite 1000 veces y al final utilizamos ese vector para observar a la distribución del coeficiente de correlación. 
 
 set.seed(123) # para que toda las veces que lo corramos obtengamos el mismo boot
 
