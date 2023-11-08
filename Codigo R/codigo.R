@@ -750,7 +750,7 @@ grafico_promedios <- ggplot(promedios_region, aes(x = reorder(Region, -Promedio_
 
 # 1b.2 Versión para el anteproyecto 
 
-# - Modificar los nombres de las regiones para que quepan
+# - Modificamos los nombres de las regiones para que quepan
 
 promedios_region$Region <- case_when(
   promedios_region$Region == "Europa" ~ "E.",
@@ -1293,7 +1293,7 @@ plot_densidad <- density(bootstrap_distribución_coeficiente$t)
 # - Para guardarlo, abre el dispositivo de salida PDF
 # pdf("grafico_distribucion_spearman.pdf", width = 8, height = 6)
       
-plot(plot_densidad, main = "",
+ plot(plot_densidad, main = "",
      xlab = "Coeficiente de Correlación de Spearman", ylab = "Densidad", col = "blue") +
      polygon(c(lower_bootstrap, plot_densidad$x, upper_bootstrap), 
      c(0, plot_densidad$y, 0), col = "lightblue") +
@@ -1357,5 +1357,46 @@ dif_superior <- abs(upper_bootstrap-upper_delta)
 # -- En relación a nuestro proyecto de investigación, entonces lo que estamos observando es que sí existe 
 #    una correlación positiva entre el consumo de alcohol y el índice de felicidad en países alrededor del mundo. 
 # -- Estamos viendo que esa correlación, según la clasificación de Barrera (2014), se considera positiva media ó considerable.
-     
+  
+
+# 4. Prueba de hipotesis 
+
+# Definir una función para dividir las correlaciones en S0 y S1
+dividir_correlaciones <- function(correlaciones, correlacion_media = mean(bootstrap_distribución_coeficiente$t), c = 0.05) {
+  S0 <- vector("list", length(correlaciones))
+  S1 <- vector("list", length(correlaciones))
+  
+  for (i in 1:length(correlaciones)) {
+    
+    if (abs(correlaciones[i] - correlacion_media) <= c) {
+      S0[[i]] <- correlaciones[i]
+    } else {
+      S1[[i]] <- correlaciones[i]
+    }
+  }
+  
+  S0 <- unlist(S0, use.names = FALSE)
+  S1 <- unlist(S1, use.names = FALSE)
+  
+  return(list(S0 = S0, S1 = S1))
+}
+
+resultados <- dividir_correlaciones(bootstrap_distribución_coeficiente$t,mean(bootstrap_distribución_coeficiente$t), c = 0.05)
+
+probabilidad_S0 <- length(resultados$S0) / length(bootstrap_distribución_coeficiente$t)
+
+# la probabilidad de que una correlación esté en S es de 0.55 cuando c es 0.05
+
+
+# Otra opción
+
+correlacion_prueba <- cor.test(base_datos$indice_de_felicidad, base_datos$poblacion_Total_consumo,
+         alternative = c("two.sided"),
+         method = c("spearman"),
+         exact = FALSE, conf.level = 0.95, continuity = FALSE)
+
+# rho = 0.5523062 
+
+
+
 
