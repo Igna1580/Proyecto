@@ -1241,7 +1241,7 @@ resultados_estadisticos_dist <- data.frame(
   CoeficienteVariacion = coeficiente_variacion_dist
 )
 
-rownames(resultados_estadisticos_dist) <- "Distribución del coeficiente de correlación de Spearman"
+rownames(resultados_estadisticos_dist) <- "Distribución"
 print(resultados_estadisticos_dist)
 
 # 3b.2 Resultados interesantes:
@@ -1398,5 +1398,56 @@ correlacion_prueba <- cor.test(base_datos$indice_de_felicidad, base_datos$poblac
 # rho = 0.5523062 
 
 
+# uniformidad de datos de alcohol
+
+# H0: Los datos de alcohol siguen una distribución uniforme
+# Ha: Los datos de alcohol no siguen una distribución uniforme
+
+datos <- base_datos$poblacion_Total_consumo
+
+# con 26 intervalos 
+num_intervalos <- 26
+
+cortes <- seq(0, 13.2, length.out = num_intervalos + 1)
+
+# Crea intervalos
+intervalos <- cut(datos, breaks = cortes, include.lowest = TRUE, right = TRUE)
+
+# Cuenta las frecuencias en cada intervalo
+frecuencias_obs <- table(intervalos)
+
+# Frecuencia esperada para una distribución uniforme
+frecuencia_esperada <- length(datos) / num_intervalos
+frecuencias_esp <- rep(frecuencia_esperada, num_intervalos)
+
+prueba_chi_cuadrado <- chisq.test(frecuencias_obs, p = frecuencias_esp / sum(frecuencias_esp))
+
+# Resultado: Con un nivel de significancia de 87.22%, no rechazamos la hipótesis de que los datos siguen una distribución uniforme. 
+
+# Con 10 intervalos
+
+datos <- base_datos$poblacion_Total_consumo
+num_intervalos <- 10
+
+cortes <- seq(0, 13.2, length.out = num_intervalos + 1)
+
+# Crea intervalos
+intervalos <- cut(datos, breaks = cortes, include.lowest = TRUE, right = TRUE)
+
+# Cuenta las frecuencias en cada intervalo
+frecuencias_obs <- table(intervalos)
+
+# Frecuencia esperada para una distribución uniforme
+frecuencia_esperada <- length(datos) / num_intervalos
+frecuencias_esp <- rep(frecuencia_esperada, num_intervalos)
+
+prueba_chi_cuadrado <- chisq.test(frecuencias_obs, p = frecuencias_esp / sum(frecuencias_esp))
+
+# Resultado: Con un nivel de significancia de 87.22%, no rechazamos la hipótesis de que los datos siguen una distribución uniforme. 
 
 
+ks_test <- ks.test(datos, "punif", min = min(datos), max = max(datos))
+
+# con alerta de la existencia de empates
+
+ks_test <- ks.test(unique(datos), "punif", min = min(datos), max = max(datos))
